@@ -47,16 +47,19 @@ def display(edges, output_file='graph.png'):
     G.add_edges_from(edges)
 
     plt.figure(figsize=(8, 6))
-    pos = nx.spring_layout(G, seed=42)
+    pos = nx.circular_layout(G)
+    plt.title("A simple Graph")
     nx.draw(
         G,
         pos,
         with_labels=True,
-        node_color="blue",
+        node_color="green",
         edge_color='black',
         node_size=500,
+        
     )
     plt.savefig(output_file, dpi=300)
+    plt.show()
     plt.close()
 
 def main():
