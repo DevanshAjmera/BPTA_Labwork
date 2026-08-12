@@ -1,47 +1,43 @@
-import random
 import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def generate_random_edges(n, m):
-    if m> n*(n-1)//2:
-        raise ValueError("edges cant be more than vertices.")
+def input_data():
+    n = int(input("Enter total vertices: "))
+    m = int(input("Enter total edges: "))
     
-    edges = set()
-    while len(edges) < m:
-        u = random.randint(1, n)
-        v = random.randint(1, n)
+    if m> n*(n-1)//2:
+        raise ValueError("edges are more")
+    elif m < n-1:
+        raise ValueError("edges cant be less than vertices-1.")
+    
+    edge_set = set()
+    i = 1
+    while len(edge_set) < m:
+        u = int(input(f'Enter 1st vertex of edge {i}: '))
+        v = int(input(f'Enter 2nd vertex of edge {i}: '))
         if u == v:
             continue
         edge = tuple(sorted((u, v)))
-        edges.add(edge)
-    return list(edges)
+        edge_set.add(edge)
+        i += 1
+    return n,m,list(edge_set)
 
 
-def display(edges):
+def display():
+    n,m,edges = input_data()
     G = nx.Graph()
     G.add_edges_from(edges)
 
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8,6))
     pos = nx.circular_layout(G)
-    plt.title("A simple Graph")
-    nx.draw(
-        G,
-        pos,
+    plt.title(f"Graph = ({n},{m})")
+
+    nx.draw(G,pos,
         with_labels=True,
-        node_color="green",
-        edge_color='black',
-        node_size=500,
-        
+        node_color="green", edge_color='black', node_size=600,   
     )
     plt.show()
     plt.close()
 
-def main():
-    n, m = 10, 20
-    edges = generate_random_edges(n, m)
-
-    display(edges)
-
-if __name__ == "__main__":
-    main()
+display()
