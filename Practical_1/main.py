@@ -1,14 +1,34 @@
+import matplotlib.pyplot as plt
 import random
 import networkx as nx
-import matplotlib.pyplot as plt
 
-def read_n_m():
-    with open('input.txt', "r") as f:
-        first_line = f.readline().strip()
-    n, m = map(int, first_line.split())
-    return n, m
+def subsets(index,subset,vertices,powerset):
+    if index >= len(vertices):
+        powerset.append(subset.copy())
+        return 
 
-def generate_random_edges(n, m):
+    subset.append(vertices[index])
+    subsets(index+1,subset,vertices,powerset)
+    subset.pop()
+    subsets(index+1,subset,vertices,powerset)
+
+def isvc(g,subset):
+    for u,v in g.edges():
+        if u not in subset and v not in subset:
+            return False
+    return True
+
+def min_vc(g,vertices,powerset):
+    min = len(vertices)
+    vc = vertices
+    for subset in powerset:
+        if isvc(g,subset) and min > len(subset):
+            min = len(subset)
+            vc = subset
+    return vc
+
+
+def generate_edges(n, m):
     if m> n*(n-1)//2:
         raise ValueError("edges cant be more than vertices.")
     
@@ -22,19 +42,18 @@ def generate_random_edges(n, m):
         edges.add(edge)
     return list(edges)
 
-def write_edges(n, m, edges):
-    with open('input.txt', "w") as f:
+def write_edges(n, m, edges,i):
+    with open(f'Input/input{i}.txt', "w") as f:
         f.write(f"{n} {m}\n")
         for u, v in edges:
             f.write(f"{u} {v}\n")
 
-def read_edges():
+def read_edges(i):
     edges = []
-    with open('input.txt', "r") as f:
+    with open(f'Input/input{i}.txt', "r") as f:
         lines = f.readlines()
 
     for line in lines[1:]:
-        line = line.strip()
         if not line:
             continue
 
@@ -42,33 +61,41 @@ def read_edges():
         edges.append((u, v))
     return edges
 
-def display(edges, output_file='graph.png'):
+def display(n, edges, i):
     G = nx.Graph()
+    vertices = [i+1 for i in range(n)]
+    G.add_nodes_from(vertices)
     G.add_edges_from(edges)
 
+    powerset = []
+    subsets(0,[],vertices,powerset)
+    vc = min_vc(G,vertices,powerset)
+
+    with open(f'Input/input{i}.txt','+a') as f:
+        f.write(f'Vertex cover of size {len(vc)} : {vc}')
+
+    color = []
+    for v in vertices:
+        if v in vc:
+            color.append('red')
+        else:
+            color.append('blue')
+    
     plt.figure(figsize=(8, 6))
     pos = nx.circular_layout(G)
-    plt.title("A simple Graph")
+    plt.title(f"Graph {i}")
     nx.draw(
-        G,
-        pos,
-        with_labels=True,
-        node_color="green",
-        edge_color='black',
-        node_size=500,
-        
+        G,pos,
+        with_labels=True,node_color=color, node_size=500,
     )
-    plt.savefig(output_file, dpi=300)
-    plt.show()
-    plt.close()
+    plt.savefig(f'Visualize/graph{i}.png', dpi=300)
+    # plt.show()
 
-def main():
-    n, m = read_n_m()
-    edges = generate_random_edges(n, m)
-
-    write_edges(n, m, edges)
-    edges = read_edges()
-    display(edges)
-
-if __name__ == "__main__":
-    main()
+n = 10
+i = 1
+for m in range(10,46,5):
+    edges = generate_edges(n, m)
+    write_edges(n, m, edges,i)
+    edges = read_edges(i)
+    display(n, edges, i)
+    i += 1
