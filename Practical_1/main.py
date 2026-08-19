@@ -61,7 +61,7 @@ def read_edges(i):
         edges.append((u, v))
     return edges
 
-def display(n, edges, i):
+def display(n, m, edges, i):
     G = nx.Graph()
     vertices = [i+1 for i in range(n)]
     G.add_nodes_from(vertices)
@@ -82,10 +82,10 @@ def display(n, edges, i):
             color.append('blue')
     
     plt.figure(figsize=(8, 6))
-    pos = nx.circular_layout(G)
-    plt.title(f"Graph {i}")
+    coordinates = nx.circular_layout(G)
+    plt.title(f"Graph {i} = {n,m}")
     nx.draw(
-        G,pos,
+        G,coordinates,
         with_labels=True,node_color=color, node_size=500,
     )
     plt.savefig(f'Visualize/graph{i}.png', dpi=300)
@@ -97,5 +97,5 @@ for m in range(10,46,5):
     edges = generate_edges(n, m)
     write_edges(n, m, edges,i)
     edges = read_edges(i)
-    display(n, edges, i)
+    display(n, m, edges, i)
     i += 1
