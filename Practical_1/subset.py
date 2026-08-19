@@ -22,7 +22,7 @@ def vc(g,vertices,powerset):
     min = float('inf')
     vc = vertices
     for subset in powerset:
-        if isvc(subset) and min < len(subset):
+        if isvc(g,subset) and min < len(subset):
             min = len(subset)
             vc = subset
     return vc
