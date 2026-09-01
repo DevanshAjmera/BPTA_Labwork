@@ -1,6 +1,11 @@
 import matplotlib.pyplot as plt
 import random
 import networkx as nx
+import time
+import os
+
+os.makedirs('Input',exist_ok=True)
+os.makedirs('Visualize',exist_ok=True)
 
 def subsets(index,subset,vertices,powerset):
     if index >= len(vertices):
@@ -29,8 +34,10 @@ def min_vc(g,vertices,powerset):
 
 
 def generate_edges(n, m):
+    if m < n-1:
+        raise ValueError('edges cant be less than n-1')
     if m> n*(n-1)//2:
-        raise ValueError("edges cant be more than vertices.")
+        raise ValueError("edges cant be more than n*(n-1)/2.")
     
     edges = set()
     while len(edges) < m:
@@ -41,6 +48,17 @@ def generate_edges(n, m):
         edge = tuple(sorted((u, v)))
         edges.add(edge)
     return list(edges)
+
+def connected_edges(n,m):
+    while True:
+        edges = generate_edges(n, m)
+        g= nx.Graph()
+        
+        g.add_nodes_from(range(1,n+1))
+        g.add_edges_from(edges)
+
+        if nx.is_connected(g):
+            return edges
 
 def write_edges(n, m, edges,i):
     with open(f'Input/input{i}.txt', "w") as f:
@@ -67,12 +85,24 @@ def display(n, m, edges, i):
     G.add_nodes_from(vertices)
     G.add_edges_from(edges)
 
+    st_time = time.perf_counter()
+
     powerset = []
     subsets(0,[],vertices,powerset)
     vc = min_vc(G,vertices,powerset)
 
-    with open(f'Input/input{i}.txt','+a') as f:
-        f.write(f'Vertex cover of size {len(vc)} : {vc}')
+    end_time = time.perf_counter()
+
+    execution_time = (end_time-st_time)*1000
+
+    with open('result.txt', 'a') as f:
+        f.write(f"Graph {i}\n"
+            f"Total vertices : {n}\n" f"Total edges    : {m}\n"
+            f"Vertex cover   : {vc}\n" f"VC size        : {len(vc)}\n"
+            f"Execution time : {execution_time:.6f} ms\n"
+            f"Time complexity: O((2^{n})*{n}*{m}) or {(2**n)*n*m}\n"
+            f"--------------------------------\n"
+        )
 
     color = []
     for v in vertices:
@@ -86,15 +116,19 @@ def display(n, m, edges, i):
     plt.title(f"Graph {i} = {n,m}")
     nx.draw(
         G,coordinates,
-        with_labels=True,node_color=color, node_size=500,
+        with_labels=True,node_color=color, node_size=600,
     )
     plt.savefig(f'Visualize/graph{i}.png', dpi=300)
     # plt.show()
 
+with open('result.txt','w') as f:
+    f.write("Result file\n")
+    f.write("-------------\n")
+
 n = 10
 i = 1
 for m in range(10,46,5):
-    edges = generate_edges(n, m)
+    edges = connected_edges(n, m)
     write_edges(n, m, edges,i)
     edges = read_edges(i)
     display(n, m, edges, i)
