@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
-import random
 import networkx as nx
+import random
 import time
 import os
-
-os.makedirs('Input',exist_ok=True)
-os.makedirs('Visualize',exist_ok=True)
+import csv
 
 def subsets(index,subset,vertices,powerset):
     if index >= len(vertices):
@@ -49,17 +47,6 @@ def generate_edges(n, m):
         edges.add(edge)
     return list(edges)
 
-def connected_edges(n,m):
-    while True:
-        edges = generate_edges(n, m)
-        g= nx.Graph()
-        
-        g.add_nodes_from(range(1,n+1))
-        g.add_edges_from(edges)
-
-        if nx.is_connected(g):
-            return edges
-
 def write_edges(n, m, edges,i):
     with open(f'Input/input{i}.txt', "w") as f:
         f.write(f"{n} {m}\n")
@@ -95,14 +82,10 @@ def display(n, m, edges, i):
 
     execution_time = (end_time-st_time)*1000
 
-    with open('result.txt', 'a') as f:
-        f.write(f"Graph {i}\n"
-            f"Total vertices : {n}\n" f"Total edges    : {m}\n"
-            f"Vertex cover   : {vc}\n" f"VC size        : {len(vc)}\n"
-            f"Execution time : {execution_time:.6f} ms\n"
-            f"Time complexity: O((2^{n})*{n}*{m}) or {(2**n)*n*m}\n"
-            f"--------------------------------\n"
-        )
+    with open('result.csv', 'a', newline='') as f:
+        w = csv.writer(f)
+        w.writerow([(n,m),vc,len(vc),execution_time])
+
 
     color = []
     for v in vertices:
@@ -121,15 +104,23 @@ def display(n, m, edges, i):
     plt.savefig(f'Visualize/graph{i}.png', dpi=300)
     # plt.show()
 
-with open('result.txt','w') as f:
-    f.write("Result file\n")
-    f.write("-------------\n")
+def main():
 
-n = 10
-i = 1
-for m in range(10,46,5):
-    edges = connected_edges(n, m)
-    write_edges(n, m, edges,i)
-    edges = read_edges(i)
-    display(n, m, edges, i)
-    i += 1
+    os.makedirs('Input',exist_ok=True)
+    os.makedirs('Visualize',exist_ok=True)
+
+    with open('result.csv', 'w', newline ='') as f:
+        w = csv.writer(f)
+        w.writerow(['(Vertex,Edge)','Vertex Cover','Size','Execution Time'])
+
+    n = 10
+    i = 1
+    for m in range(10,46,5):
+        edges = generate_edges(n, m)
+        write_edges(n, m, edges,i)
+        edges = read_edges(i)
+        display(n, m, edges, i)
+        i += 1
+
+if __name__ == '__main__':
+    main()
