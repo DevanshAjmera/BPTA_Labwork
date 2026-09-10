@@ -1,3 +1,4 @@
+import time
 def maximal_matching(edges):
     match = []
     vc = []
@@ -29,7 +30,13 @@ def read_input(i):
             edges.append((u,v))
     return n, m, edges
 
-n, m, edges = read_input(1)
-vc, match = maximal_matching(edges)
-print(n, m, edges)
-print(vc, len(vc), match)
+
+
+for i in range(1,9):
+    n, m, edges = read_input(i)
+    st_time = time.perf_counter()
+    vc, match = maximal_matching(edges)
+    end_time = time.perf_counter()
+    print('Vertex cover:',vc,'\n','size:',len(vc),'\n','Maximal_matching',match,)
+    print('Time',(end_time-st_time)*1000)
+    print('\n')
