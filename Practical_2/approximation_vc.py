@@ -1,3 +1,7 @@
+import os
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import time
 import csv
 
@@ -17,7 +21,7 @@ def maximal_matching(edges):
 
 def read_input(i):
     edges = []
-    with open(f'Input/input{i}.txt', 'r') as f:
+    with open(f'../Practical_1/Input/input{i}.txt', 'r') as f:
         lines = f.readlines()
         n, m = map(int, lines[0].split())
 
@@ -36,6 +40,59 @@ def csv_update(rows, n, m, vc, size, time):
             row[6] = time
             break
 
+def create_graph(match, vc, n, m, i, edges):
+
+    os.makedirs("output", exist_ok=True)
+
+    G = nx.Graph()
+    G.add_nodes_from(range(1, n + 1))
+    G.add_edges_from(edges)
+
+    vc_set = set(vc)
+
+    node_colors = ["red" if node in vc_set else "lightblue" for node in G.nodes() ]
+
+    match_set = {tuple(sorted(edge)) for edge in match}
+
+    edge_colors = [
+        "green" if tuple(sorted(edge)) in match_set else "black"
+        for edge in G.edges()
+    ]
+
+    # pos = nx.circular_layout(G)
+
+    plt.figure(figsize=(10, 8))
+
+    nx.draw( G, with_labels=True, node_color=node_colors, edge_color=edge_colors, node_size=700, font_size=10, font_weight="bold", width=2)
+
+    plt.title(
+        f"Graph {i} | n={n}, m={m}\n"
+        f"Vertex Cover = {vc} | Matching Size = {len(match)}"
+    )
+
+    legend_elements = [
+        Line2D(
+            [0], [0],
+            marker="o",
+            color="w",
+            label="Vertex Cover",
+            markerfacecolor="red",
+            markersize=10
+        ),
+        Line2D(
+            [0], [0],
+            color="green",
+            lw=3,
+            label="Matching Edge"
+        )
+    ]
+
+    plt.legend(handles=legend_elements)
+
+    output_file = os.path.join('output', f"graph_{i}.png")
+    plt.savefig(output_file,dpi=300)
+    plt.close()
+    print(f"Graph {i} saved to {output_file}")
 
 
 def main():
@@ -58,6 +115,8 @@ def main():
         execution_time = (end_time-st_time)*1000
 
         csv_update(rows, n,m,vc, len(vc), execution_time)
+
+        create_graph( match, vc, n, m, i, edges)
 
     with open('../Practical_1/result.csv', 'w', newline='') as f:
         w = csv.writer(f)
