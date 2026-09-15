@@ -33,12 +33,13 @@ def read_input(i):
             edges.append((u,v))
     return n, m, edges
 
-def csv_update(rows, n, m, size, time, factor):
+def csv_update(rows, n, m, size, match_size, time, factor):
     for row in rows[1:]:
         if row[0] == str((n,m)):
             row[3] = size
-            row[4] = time
-            row[5] = factor
+            row[4] = match_size
+            row[5] = time
+            row[6] = factor
             break
 
 def create_graph(match, vc, n, m, i, edges):
@@ -88,10 +89,10 @@ def main():
 
     
     if 'Approximation_size' not in rows[0]:
-        rows[0].extend(['vc_size(approx.)', 'Execution_Time', 'Approximation_Factor'])
+        rows[0].extend(['vc_size(approx.)', 'Match_size', 'Execution_Time', 'Approximation_Factor'])
     
         for row in rows[1:]:
-                row.extend(['', '', ''])
+                row.extend(['', '', '', ''])
 
     for i in range(1,9):
         n, m, edges = read_input(i)
@@ -110,7 +111,7 @@ def main():
 
         factor = approximation_factor(vc, optimal_size)
 
-        csv_update(rows, n,m,len(vc), execution_time, factor)
+        csv_update(rows, n,m,len(vc), len(match), execution_time, factor)
 
         create_graph( match, vc, n, m, i, edges)
 
