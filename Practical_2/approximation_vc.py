@@ -5,7 +5,7 @@ from matplotlib.lines import Line2D
 import time
 import csv
 
-def maximal_matching(edges):
+def approximation_algo(edges):
     match = []
     vc = []
 
@@ -14,14 +14,15 @@ def maximal_matching(edges):
             vc.append(u)
             vc.append(v)
             match.append((u,v))
-
     return vc, match
 
-
+def approximation_factor(vc, opt_size):
+    return round(len(vc) / opt_size,3)
 
 def read_input(i):
     edges = []
-    with open(f'../Practical_1/Input/input{i}.txt', 'r') as f:
+    # with open(f'../Practical_1/Input/input{i}.txt', 'r') as f:
+    with open(f'Input/input{i}.txt', 'r') as f:
         lines = f.readlines()
         n, m = map(int, lines[0].split())
 
@@ -32,12 +33,12 @@ def read_input(i):
             edges.append((u,v))
     return n, m, edges
 
-def csv_update(rows, n, m, vc, size, time):
+def csv_update(rows, n, m, size, time, factor):
     for row in rows[1:]:
         if row[0] == str((n,m)):
-            row[4] = vc
-            row[5] = size
-            row[6] = time
+            row[3] = size
+            row[4] = time
+            row[5] = factor
             break
 
 def create_graph(match, vc, n, m, i, edges):
@@ -48,46 +49,27 @@ def create_graph(match, vc, n, m, i, edges):
     G.add_nodes_from(range(1, n + 1))
     G.add_edges_from(edges)
 
-    vc_set = set(vc)
+    node_color = []
+    for node in G.nodes:
+        if node in vc:
+            node_color.append('red') 
+        else:
+            node_color.append('lightblue')
 
-    node_colors = ["red" if node in vc_set else "lightblue" for node in G.nodes() ]
-
-    match_set = {tuple(sorted(edge)) for edge in match}
-
-    edge_colors = [
-        "green" if tuple(sorted(edge)) in match_set else "black"
-        for edge in G.edges()
-    ]
-
-    # pos = nx.circular_layout(G)
-
+    edge_color = []
+    for edge in edges:
+        if edge in match:
+            edge_color.append('green')
+        else:
+            edge_color.append('black')
+    
     plt.figure(figsize=(10, 8))
-
-    nx.draw( G, with_labels=True, node_color=node_colors, edge_color=edge_colors, node_size=700, font_size=10, font_weight="bold", width=2)
+    nx.draw(G, with_labels=True, node_color=node_color, edge_color=edge_color, node_size=700)
 
     plt.title(
         f"Graph {i} | n={n}, m={m}\n"
         f"Vertex Cover = {vc} | Matching Size = {len(match)}"
     )
-
-    legend_elements = [
-        Line2D(
-            [0], [0],
-            marker="o",
-            color="w",
-            label="Vertex Cover",
-            markerfacecolor="red",
-            markersize=10
-        ),
-        Line2D(
-            [0], [0],
-            color="green",
-            lw=3,
-            label="Matching Edge"
-        )
-    ]
-
-    plt.legend(handles=legend_elements)
 
     output_file = os.path.join('output', f"graph_{i}.png")
     plt.savefig(output_file,dpi=300)
@@ -96,29 +78,45 @@ def create_graph(match, vc, n, m, i, edges):
 
 
 def main():
-    with open('../Practical_1/result.csv','r',newline='') as f:
-            rows = list(csv.reader(f))
+    # with open('../Practical_1/result.csv','r',newline='') as f:
+    with open('result.csv', 'r', newline='') as f:
+        rows = list(csv.reader(f))
     
-    if 'Approximation_vc' not in rows[0]:
-        rows[0].extend(['Approximation_vc', 'Size', 'Execution_Time'])
+    if 'Vertex Cover' in rows[0]:
+        for row in rows:
+            del row[1]
+
+    
+    if 'Approximation_size' not in rows[0]:
+        rows[0].extend(['vc_size(approx.)', 'Execution_Time', 'Approximation_Factor'])
     
         for row in rows[1:]:
                 row.extend(['', '', ''])
 
     for i in range(1,9):
         n, m, edges = read_input(i)
+        optimal_size = None
+
+        for row in rows[1:]:
+            if row[0] == str((n, m)):
+                optimal_size = int(row[1])
+                break
         
         st_time = time.perf_counter()
-        vc, match = maximal_matching(edges)
+        vc, match = approximation_algo(edges)
         end_time = time.perf_counter()
 
-        execution_time = (end_time-st_time)*1000
+        execution_time = round((end_time-st_time)*1000,4)
 
-        csv_update(rows, n,m,vc, len(vc), execution_time)
+        factor = approximation_factor(vc, optimal_size)
+
+        csv_update(rows, n,m,len(vc), execution_time, factor)
 
         create_graph( match, vc, n, m, i, edges)
 
-    with open('../Practical_1/result.csv', 'w', newline='') as f:
+
+    # with open('../Practical_1/result.csv', 'w', newline='') as f:
+    with open('result.csv', 'w', newline='') as f:
         w = csv.writer(f)
         w.writerows(rows)
 
