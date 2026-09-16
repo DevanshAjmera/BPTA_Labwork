@@ -1,7 +1,6 @@
 import os
 import networkx as nx
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 import time
 import csv
 
@@ -9,12 +8,14 @@ def approximation_algo(edges):
     match = []
     vc = []
 
-    for u,v in edges:
+    for u, v in edges:
         if u not in vc and v not in vc:
+            match.append((u, v))
             vc.append(u)
             vc.append(v)
-            match.append((u,v))
+
     return vc, match
+
 
 def approximation_factor(vc, opt_size):
     return round(len(vc) / opt_size,3)
@@ -63,15 +64,11 @@ def create_graph(match, vc, n, m, i, edges):
             edge_color.append('green')
         else:
             edge_color.append('black')
-    
+
     plt.figure(figsize=(10, 8))
-    nx.draw(G, with_labels=True, node_color=node_color, edge_color=edge_color, node_size=700)
-
-    plt.title(
-        f"Graph {i} | n={n}, m={m}\n"
-        f"Vertex Cover = {vc} | Matching Size = {len(match)}"
-    )
-
+    pos = nx.circular_layout(G)
+    nx.draw(G, pos, with_labels=True, node_color=node_color, edge_color=edge_color, edgelist = edges, node_size=700)
+    
     output_file = os.path.join('output', f"graph_{i}.png")
     plt.savefig(output_file,dpi=300)
     plt.close()
@@ -83,14 +80,13 @@ def main():
     with open('result.csv', 'r', newline='') as f:
         rows = list(csv.reader(f))
     
-    if 'Vertex Cover' in rows[0]:
-        for row in rows:
-            del row[1]
+    # if 'Vertex Cover' in rows[0]:
+    #     for row in rows:
+    #         del row[1]            just to delete existing vc from csv
 
     
-    if 'Approximation_size' not in rows[0]:
+    if 'vc_size(approx.)' not in rows[0]:
         rows[0].extend(['vc_size(approx.)', 'Match_size', 'Execution_Time', 'Approximation_Factor'])
-    
         for row in rows[1:]:
                 row.extend(['', '', '', ''])
 
