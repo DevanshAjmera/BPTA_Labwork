@@ -67,11 +67,12 @@ def create_graph(match, vc, n, m, i, edges):
 
     plt.figure(figsize=(10, 8))
     pos = nx.circular_layout(G)
+    plt.title(f'G{i} = ({n,m})')
     nx.draw(G, pos, with_labels=True, node_color=node_color, edge_color=edge_color, edgelist = edges, node_size=700)
+
     
     output_file = os.path.join('output', f"graph_{i}.png")
     plt.savefig(output_file,dpi=300)
-    plt.close()
     print(f"Graph {i} saved to {output_file}")
 
 
