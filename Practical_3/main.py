@@ -48,19 +48,19 @@ def min_vc(g,vertices,powerset):
 
 
 def approximation_algo(edges):
-    match = []
-    vc = []
+    match = set()
+    vc = set()
 
     for u, v in edges:
         if u not in vc and v not in vc:
-            match.append((u, v))
-            vc.append(u)
-            vc.append(v)
+            match.add((u, v))
+            vc.add(u)
+            vc.add(v)
 
     return vc, match
 
 def approximation_factor(vc, opt_size):
-    return round(len(vc) / opt_size,3)
+    return round(len(vc) / opt_size,5)
 
 def write_edges(n, m, edges,i):
     with open(f'Input/input{i}.txt', "w") as f:
@@ -81,7 +81,9 @@ def read_edges(i):
         edges.append((u, v))
     return edges
 
-def display(n, m, edges, i):
+def brute_force_display(n, m, edges, i):
+    os.makedirs('Visualize_brute',exist_ok=True)
+
     G = nx.Graph()
     vertices = [i+1 for i in range(n)]
     G.add_nodes_from(vertices)
@@ -99,42 +101,78 @@ def display(n, m, edges, i):
 
     with open('result.csv', 'a', newline='') as f:
         w = csv.writer(f)
-        w.writerow([(n,m),vc,len(vc),execution_time])
+        w.writerow([(n,m),len(vc),execution_time])
 
 
-    color = []
-    for v in vertices:
-        if v in vc:
-            color.append('red')
-        else:
-            color.append('blue')
+    # color = []
+    # for v in vertices:
+    #     if v in vc:
+    #         color.append('red')
+    #     else:
+    #         color.append('blue')
     
-    plt.figure(figsize=(8, 6))
-    coordinates = nx.circular_layout(G)
-    plt.title(f"Graph {i} = {n,m}")
-    nx.draw(
-        G,coordinates,
-        with_labels=True,node_color=color, node_size=600,
-    )
-    plt.savefig(f'Visualize/graph{i}.png', dpi=300)
-    # plt.show()
+    # plt.figure(figsize=(8, 6))
+    # coordinates = nx.circular_layout(G)
+    # plt.title(f"Graph {i} = {n,m}")
+    # nx.draw(
+    #     G,coordinates,
+    #     with_labels=True,node_color=color, node_size=600,
+    # )
+    # plt.savefig(f'Visualize_brute/graph{i}.png', dpi=300)
+
+    # return len(vc)
+
+def approximation_display(n,m,edges,opt_size,i):
+    os.makedirs('Visualize_approx',exist_ok=True)
+
+    st_time = time.perf_counter()
+    vc, match = approximation_algo(edges)
+    end_time = time.perf_counter()
+    execution_time = (end_time-st_time)/1000
+
+    factor = approximation_factor(vc, opt_size)
+
+    G = nx.Graph()
+    G.add_nodes_from(range(1, n + 1))
+    G.add_edges_from(edges)
+
+    edge_color = []
+    for edge in edges:
+        if edge in match:
+            edge_color.append('red')
+        else:
+            edge_color.append('black')
+
+    node_color = []
+    for v in G.nodes():
+        if v in vc:
+            node_color.append('red')
+        else:
+            node_color.append('lightblue')
+
+    plt.figure(figsize=(10, 8))
+    # pos = nx.circular_layout(G)
+    plt.title(f'G{i} = ({n,m})')
+    nx.draw(G, with_labels=True, node_color=node_color, edge_color=edge_color,node_size=700)
+
+    output_file = os.path.join('Visualize_approx', f"graph_{i}.png")
+    plt.savefig(output_file,dpi=300)
 
 def main():
-
     os.makedirs('Input',exist_ok=True)
-    os.makedirs('Visualize',exist_ok=True)
 
     with open('result.csv', 'w', newline ='') as f:
         w = csv.writer(f)
-        w.writerow(['(Vertex,Edge)','Vertex Cover','Size','Execution Time'])
+        w.writerow(['(Vertex,Edge)','Size','Execution Time', 'vc_size(approx.)', 'Execution_Time', 'Match_size', 'Approximation_Factor'])
 
-    n = 10
+    n = 20
     i = 1
-    for m in range(10,45,5):
-        edges = generate_edges(n, m)
-        write_edges(n, m, edges,i)
+    for m in range(20,190,10):
+        # edges = generate_edges(n, m)
+        # write_edges(n, m, edges,i)
         edges = read_edges(i)
-        display(n, m, edges, i)
+        opt_size = brute_force_display(n, m, edges, i)
+        # approximation_display(n,m,edges,opt_size, i)
         i += 1
 
 if __name__ == '__main__':
