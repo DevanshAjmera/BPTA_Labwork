@@ -95,7 +95,7 @@ def brute_force_display(n, m, edges, i):
     vc = min_vc(G,vertices,powerset)
     end_time = time.perf_counter()
 
-    execution_time = (end_time-st_time)
+    execution_time = end_time-st_time
     color = []
     for v in vertices:
         if v in vc:
@@ -164,7 +164,7 @@ def main():
 
         with open('result.csv', 'a', newline='') as f:
             w = csv.writer(f)
-            w.writerow([(n,m), opt_size, brute_time, approx_size, approx_time, match_size, factor])
+            w.writerow([ (n,m), opt_size, f'{brute_time:.9f}', approx_size, f'{approx_time:.9f}', match_size, factor,])
         print(f'Output {i} saved')
         i += 1
 main()
