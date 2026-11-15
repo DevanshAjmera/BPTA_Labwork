@@ -88,8 +88,6 @@ def main():
     
     if 'vc_size(approx.)' not in rows[0]:
         rows[0].extend(['vc_size(approx.)', 'Match_size', 'Execution_Time', 'Approximation_Factor'])
-        for row in rows[1:]:
-            row.extend(['', '', '', ''])
 
     for i in range(1,9):
         n, m, edges = read_input(i)
