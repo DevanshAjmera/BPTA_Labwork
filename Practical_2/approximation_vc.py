@@ -72,7 +72,7 @@ def create_graph(match, vc, n, m, i, edges):
 
     
     output_file = os.path.join('output', f"graph_{i}.png")
-    plt.savefig(output_file,dpi=300)
+    plt.savefig(output_file,dpi=300) 
     print(f"Graph {i} saved to {output_file}")
 
 
@@ -89,7 +89,7 @@ def main():
     if 'vc_size(approx.)' not in rows[0]:
         rows[0].extend(['vc_size(approx.)', 'Match_size', 'Execution_Time', 'Approximation_Factor'])
         for row in rows[1:]:
-                row.extend(['', '', '', ''])
+            row.extend(['', '', '', ''])
 
     for i in range(1,9):
         n, m, edges = read_input(i)
