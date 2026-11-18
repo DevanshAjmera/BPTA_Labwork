@@ -23,8 +23,6 @@ def read_input(i):
         lines = f.readlines()
         n, m = map(int, lines[0].split())
         for line in lines[1:]:
-            if not line:
-                continue
             u,v =map(int, line.split())
             edges.append((u, v))
     return n , m,edges
@@ -32,16 +30,16 @@ def read_input(i):
 def lp_vertex_cover(n, edges):
     c = [1] * n
     A = []
-    b = []
+    b = [] # -xu - xv < -1
 
     for u,v in edges:
         constraint = [0] * n
-        constraint[u - 1] = -1
-        constraint[v - 1] = -1
+        constraint[u-1] = -1
+        constraint[v-1] = -1
         A.append(constraint)
         b.append(-1)
-    bound = [(0, 1)] * n
-    result = opt.linprog( c, A_ub=A, b_ub=b, bounds=bound, method="highs")
+    bound = [(0, 1)]*n
+    result = opt.linprog(c, A_ub=A, b_ub=b, bounds=bound, method="highs")
     lp_optimal = result.fun
     return result.x, lp_optimal
 
@@ -62,17 +60,12 @@ def greedy_algorithm(edges):
             vc.add(v)
     return vc, matching
 
-def read_factors():
-    with open("Input/approx_factor.txt", "r") as f:
-        return [line.strip() for line in f if line.strip()]
-
 def main():
-    # copy_inputs()
-    factors = read_factors()
+    copy_inputs()
 
     with open("result.csv", "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["(Vertex,Edge)", "Lp_optimal", "Lp_Round_size", "Greedy_Size","Lp_Factor", "Greedy_Factor", "Lp_Time"])
+        w.writerow(["(Vertex,Edge)", "Lp_optimal", "Lp_Round_size", "Greedy_Size", "Greedy_Factor", "Lprdd_Factor", "Lp_Time"])
 
     for i in range(1, 19):
         n, m, edges = read_input(i)
@@ -84,10 +77,11 @@ def main():
 
         lp_vc = lp_rounding(x)
         greedy_vc, match = greedy_algorithm(edges)
-        greedy_factor = round(len(greedy_vc)/lp_optimal, 6)
+        greedy_factor = round(len(greedy_vc)/lp_optimal, 2)
+        lpddr_factor = len(lp_vc)/lp_optimal
 
         with open("result.csv", "a", newline="") as f:
             w = csv.writer(f)
-            w.writerow([(n, m), round(lp_optimal, 6), len(lp_vc), len(greedy_vc), greedy_factor, factors[i-1], f"{lp_time:.8f}"])
-
+            w.writerow([(n, m),lp_optimal, len(lp_vc), len(greedy_vc), greedy_factor, lpddr_factor, f"{lp_time:.8f}"])
+        print(f'({n},{m}) done')
 main()

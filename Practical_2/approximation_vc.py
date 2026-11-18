@@ -22,8 +22,8 @@ def approximation_factor(vc, opt_size):
 
 def read_input(i):
     edges = []
-    # with open(f'../Practical_1/Input/input{i}.txt', 'r') as f:
-    with open(f'Input/input{i}.txt', 'r') as f:
+    with open(f'../Practical_1/Input/input{i}.txt', 'r') as f:
+    # with open(f'Input/input{i}.txt', 'r') as f:
         lines = f.readlines()
         n, m = map(int, lines[0].split())
 
